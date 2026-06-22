@@ -1,22 +1,35 @@
-const {
-    allowRequest
-} = require("../services/tokenBucketService");
+const rateLimiterService =
+    require("../services/RateLimiterService");
 
-function checkRateLimit(req, res) {
+function checkRateLimit(req,res){
 
-    const { clientKey } = req.body;
+    try{
 
-    if (!clientKey) {
+        const { clientKey } =
+            req.body;
 
-        return res.status(400).json({
-            error: "clientKey required"
-        });
+        const result =
+            rateLimiterService.check(
+                clientKey
+            );
+
+        if(result.allowed){
+
+            return res.status(200)
+                .json(result);
+        }
+
+        return res.status(429)
+            .json(result);
+
     }
+    catch(err){
 
-    const result =
-        allowRequest(clientKey);
-
-    return res.status(200).json(result);
+        return res.status(400)
+            .json({
+                error: err.message
+            });
+    }
 }
 
 module.exports = {
