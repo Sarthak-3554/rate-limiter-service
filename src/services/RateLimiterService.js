@@ -6,7 +6,7 @@ const RateLimiterFactory =
 
 class RateLimiterService {
 
-    check(clientKey){
+    async check(clientKey){
 
         const client =
             clients.get(clientKey);  // get client info from in-memory store
@@ -23,7 +23,7 @@ class RateLimiterService {
                 client.algorithm
             );
 
-        return limiter.allowRequest(
+        return await limiter.allowRequest(
             clientKey,
             client
         );

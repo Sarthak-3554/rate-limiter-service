@@ -3,22 +3,43 @@ const express = require("express");
 const rateLimitRoutes =
     require("./routes/rateLimitRoutes");
 
-
-
-
+const redisClient = require("./config/redis");
 
 const app = express();
 
-app.use(express.json());
+const PORT = process.env.PORT || 3000;
 
-app.use("/api", rateLimitRoutes);
+async function startServer(){
 
-const PORT = 3000;
+    try{
 
-app.listen(PORT, () => {
+        await redisClient.connect();
 
-    console.log(
-        `Server running on port ${PORT}`
-    );
+        console.log(
+            "Connected to Redis"
+        );
 
-});
+        app.listen(PORT, async () => {
+
+            console.log(
+                `Server running on ${PORT}`
+            );
+
+            app.use(express.json());
+
+            app.use("/api",rateLimitRoutes);
+        });
+
+    }
+    catch(err){
+
+        console.error(
+            "Failed to connect Redis:",
+            err.message
+        );
+
+        process.exit(1);
+    }
+}
+
+startServer();

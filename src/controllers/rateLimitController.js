@@ -1,7 +1,7 @@
 const rateLimiterService =
     require("../services/RateLimiterService");
 
-function checkRateLimit(req,res){
+async function checkRateLimit(req,res){
 
     try{
 
@@ -9,7 +9,7 @@ function checkRateLimit(req,res){
             req.body;
 
         const result =
-            rateLimiterService.check(
+            await rateLimiterService.check(
                 clientKey
             );
 
