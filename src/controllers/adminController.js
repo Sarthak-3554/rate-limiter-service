@@ -1,9 +1,9 @@
 const clientService = require('../services/clientService');
 
-function adminCreateClient(req,res){
+async function adminCreateClient(req,res){
     try {
         const client_config = req.body
-        const result = clientService.createClient(client_config)
+        const result = await clientService.createClient(client_config)
 
         
         return res.status(200).json(result)
@@ -13,10 +13,10 @@ function adminCreateClient(req,res){
     }
 }
 
-function adminGetClient(req,res){
+async function adminGetClient(req,res){
     try {
         const {clientKey} = req.params
-        const result = clientService.getClient(clientKey)
+        const result = await clientService.getClient(clientKey)
 
         return res.status(200).json(result)
         

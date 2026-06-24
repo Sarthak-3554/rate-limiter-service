@@ -13,6 +13,32 @@ async function checkRateLimit(req,res){
                 clientKey
             );
 
+        res.set(
+            "X-RateLimit-Limit",
+            result.capacity.toString()
+        );
+
+        res.set(
+            "X-RateLimit-Remaining",
+            result.remaining.toString()
+        );
+
+        let resetTime = "never";
+
+        if(result.refillRate > 0){
+
+            resetTime =
+                Math.ceil(
+                    Date.now()/1000 +
+                    (1/result.refillRate)
+                ).toString();
+        }
+
+        res.set(
+            "X-RateLimit-Reset",
+            resetTime
+        );
+
         if(result.allowed){
 
             return res.status(200)

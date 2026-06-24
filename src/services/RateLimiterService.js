@@ -1,5 +1,4 @@
-const clients =
-    require("../data/clients");
+const clients = require("./ClientService.js");
 
 const RateLimiterFactory =
     require("./factories/RateLimiterFactory");
@@ -9,7 +8,7 @@ class RateLimiterService {
     async check(clientKey){
 
         const client =
-            clients.get(clientKey);  // get client info from in-memory store
+            await clients.getClient(clientKey);  // get client info from in-memory store
 
         if(!client){
 
@@ -23,10 +22,17 @@ class RateLimiterService {
                 client.algorithm
             );
 
-        return await limiter.allowRequest(
-            clientKey,
-            client
-        );
+        const result = await limiter.allowRequest(clientKey,client);
+
+        return {
+            ...result,
+
+            capacity:
+                client.capacity,
+
+            refillRate:
+                client.refillRate
+        };
     }
 }
 
