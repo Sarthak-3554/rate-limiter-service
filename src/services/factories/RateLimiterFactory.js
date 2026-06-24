@@ -1,18 +1,26 @@
 const TokenBucketLimiter =
     require("../limiters/TokenBucketLimiter");
 
+const SlidingWindowLimiter =
+    require("../limiters/SlidingWindowLimiter");
+
 class RateLimiterFactory {
 
-    static getLimiter(type){
+    static getLimiter(
+        algorithm
+    ){
 
-        switch(type){
+        switch(algorithm){
 
             case "token_bucket":
                 return new TokenBucketLimiter();
 
+            case "sliding_window":
+                return new SlidingWindowLimiter();
+
             default:
                 throw new Error(
-                    "Unknown limiter type"
+                    "Unsupported algorithm"
                 );
         }
     }

@@ -5,39 +5,29 @@ async function checkRateLimit(req,res){
 
     try{
 
-        const { clientKey } =
-            req.body;
+        const { clientKey } = req.body;
 
-        const result =
-            await rateLimiterService.check(
-                clientKey
-            );
+        const result = await rateLimiterService.check(clientKey);
 
-        res.set(
-            "X-RateLimit-Limit",
-            result.capacity.toString()
+        // Common limit header
+        const limit = result.algorithm === "token_bucket"? result.capa: result.limit;
+
+        res.set( "X-RateLimit-Limit",limit.toString());
+
+        res.set("X-RateLimit-Remaining",result.remaining.toString()
         );
 
-        res.set(
-            "X-RateLimit-Remaining",
-            result.remaining.toString()
-        );
+        // Token Bucket reset calculation
+        if(result.algorithm ==="token_bucket"){
 
-        let resetTime = "never";
+            let resetTime = "never";
 
-        if(result.refillRate > 0){
+            if(result.refillRate > 0){
+                resetTime = Math.ceil(Date.now()/1000 +(1/result.refillRate)).toString();
+            }
 
-            resetTime =
-                Math.ceil(
-                    Date.now()/1000 +
-                    (1/result.refillRate)
-                ).toString();
+            res.set("X-RateLimit-Reset",resetTime);
         }
-
-        res.set(
-            "X-RateLimit-Reset",
-            resetTime
-        );
 
         if(result.allowed){
 

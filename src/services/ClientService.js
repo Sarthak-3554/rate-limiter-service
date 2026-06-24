@@ -23,15 +23,41 @@ class ClientService {
             throw new Error("Refill rate cannot be negative");
         }
 
-        if(config.algorithm !== "token_bucket"){
-            throw new Error("Unsupported algorithm");
+        if(config.algorithm !== "token_bucket" && config.algorithm !== "sliding_window"){
+            throw new Error(
+                "Unsupported algorithm"
+            );
         }
 
-        await redisClient.hSet(`client:${config.clientKey}`,{
-            algorithm: config.algorithm,
-            capacity: config.capacity,
-            refillRate: config.refillRate
-        });
+        if(config.algorithm === "sliding_window"){
+            if(!config.limit || config.limit <= 0){
+                throw new Error(
+                    "Limit must be greater than 0"
+                );
+            }
+
+            if(!config.windowSize || config.windowSize <= 0){
+                throw new Error(
+                    "Window size must be greater than 0"
+                );
+            }
+        }
+
+        const clientData = {algorithm: config.algorithm };
+
+        if(config.algorithm === "token_bucket"){
+            clientData.capacity = config.capacity;
+
+            clientData.refillRate = config.refillRate;
+        }
+        else{
+
+            clientData.limit = config.limit;
+
+            clientData.windowSize = config.windowSize;
+        }
+
+        await redisClient.hSet(`client:${config.clientKey}`,clientData);
         
 
         return {
@@ -50,11 +76,20 @@ class ClientService {
             );
         }
 
+        if(client.algorithm ==="token_bucket"){
+            return {
+                clientKey,
+                algorithm:client.algorithm,
+                capacity:Number(client.capacity),
+                refillRate:Number(client.refillRate)
+            };
+        }
+
         return {
             clientKey,
-            algorithm: client.algorithm,
-            capacity: parseInt(client.capacity),
-            refillRate: parseFloat(client.refillRate)
+            algorithm:client.algorithm,
+            limit:Number(client.limit),
+            windowSize:Number(client.windowSize)
         };
     }
 }

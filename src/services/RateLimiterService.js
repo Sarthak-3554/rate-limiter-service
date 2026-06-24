@@ -25,13 +25,8 @@ class RateLimiterService {
         const result = await limiter.allowRequest(clientKey,client);
 
         return {
-            ...result,
-
-            capacity:
-                client.capacity,
-
-            refillRate:
-                client.refillRate
+        ...result,
+        ...client
         };
     }
 }
