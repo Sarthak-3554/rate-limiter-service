@@ -16,9 +16,21 @@ class ClientService {
             );
         }
 
-        if(config.capacity <= 0 || config.refillRate <= 0 || config.algorithm !== "token_bucket"){
+        if(config.capacity <= 0){
+    throw new Error(
+        "Capacity must be greater than 0"
+    );
+}
+
+        if(config.refillRate < 0){
             throw new Error(
-                "Invalid client configuration"
+                "Refill rate cannot be negative"
+            );
+        }
+
+        if(config.algorithm !== "token_bucket"){
+            throw new Error(
+                "Unsupported algorithm"
             );
         }
 
